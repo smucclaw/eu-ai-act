@@ -135,3 +135,5 @@ echo "* generate git commits"
   done
 )
 
+echo "* pushing to origin"
+git push --force origin $branchName
