@@ -58,7 +58,6 @@ parallel --progress                                 \
 	 -t markdown                                \
 	 -o $workDir/orig/{/.}.md                   \
 	 --wrap=none                                \
-	 --lua-filter=lua/delete_image.lua          \
 	 --lua-filter=lua/blockquote_to_plain.lua   \
 	 ::: $docxDir/*.docx
 

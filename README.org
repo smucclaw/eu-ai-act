@@ -1,1 +1,58 @@
-test repo for git commit approach to the eu ai act
+#+TITLE: test repo for git commit approach to the eu ai act
+
+This repo serves a prototype of a PDF-to-Git workflow, aimed at processing the various editions of the EU AI Act.
+
+* Background
+
+https://artificialintelligenceact.eu/ is, as of [2023-03-01 Wed], undergoing edits.
+
+The edits are happening, as far as we can tell, in Word.
+
+Yes, they use Track Changes.
+
+No, they do not share the Word docs with the public.
+
+Instead, they share the PDF exports of the Track Changes with the public: deletions are shown as strikeouts, and new text is shown in bold.
+
+These are what we might call passive-aggressive PDFs: almost as bad as though one printed the file and then scanned the printout to PDF.
+
+Being programmers, we see all this is a job for Git: see https://ben.balter.com/2015/02/06/word-diff/ for a longer apologia.
+
+* Data Transformation Architecture
+
+Anyway, we download the available PDFs from https://artificialintelligenceact.eu/documents to [[https://github.com/smucclaw/eu-ai-act/tree/main/input-pdfs][input-pdfs]].
+
+We identify those PDFs that seem to contain revisions of the AI Act, and rename them using YYYY-MM-DD prefixes.
+
+We use Adobe Acrobat to perform PDF-to-Word extraction on those files; the results are found in [[https://github.com/smucclaw/eu-ai-act/tree/main/input-docx][input-docx]].
+
+Then we run [[https://github.com/smucclaw/eu-ai-act/blob/main/bin/actxtract][actxtract]], a shell script that drives the rest of the process.
+
+Pandoc takes us from Word to Markdown.
+
+We cope with the strikeouts and bold text to arrive at snapshots.
+
+We create a git branch containing a single file ~act.md~ whose history shows all the snapshots... and their diffs.
+
+* Prerequisites
+
+- Pandoc
+- Parallel
+  
+* Usage
+
+#+begin_src sh
+  bin/actxtract ~/src/smucclaw/eu-ai-act input-docx workdir 'Having regard to the Treaty on the Functioning of the European Union' | tee actxtract.org
+#+end_src
+
+The arguments are:
+1. your local repo
+2. directory containing docx input files
+3. directory for temporary work files
+4. string that delimits the preamble; we discard text above this
+
+The output gets saved to ~actxtract.org~ which you can open as an org-mode in your favourite editor, such as Emacs.
+
+* Output
+
+If all goes well, a new branch is created and uploaded to Github. In that branch you will find an ~act.md~ which has a history of commits. Those commits correspond to the various versions of the Act found in the original set of input PDFs and Word Docx.
