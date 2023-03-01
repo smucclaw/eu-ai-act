@@ -1,0 +1,137 @@
+#!/bin/bash
+
+# actxtract, pronounced "extract"
+
+# USAGE
+# actxtract ~/src/smucclaw/eu-ai-act/ workdir/docx/ workdir/ PreambleMarker
+if [ -z "$3" ]; then
+    echo "usage: actxtract repositoryDir inputDocxDir workdir 'Having regard to the Treaty on the Functioning of the European Union'"
+    exit
+fi
+
+# example: bin/actxtract ~/src/smucclaw/eu-ai-act input-docx workdir 'Having regard to the Treaty on the Functioning of the European Union' | tee actxtract.org
+
+# GOALS
+# 
+# given a set of Word Docx files
+# - which, presumably, originated as a set of PDFs,
+#   perhaps converted by Adobe Acrobat Export in a previous step
+# - formatted as though someone had printed "track changes"
+#   so new text is in bold and deleted text is in strikeout
+#
+# the task is to:
+# - construct a series of snapshots in Markdown format
+# - generate a series of git commits checking in each snapshot generated
+# - push those commmits to github.
+
+# PREREQUISITES
+# you may need to install
+# - parallel
+# - pandoc
+
+# COMMAND LINE ARGUMENTS
+#
+# github repo directory is given on the command line
+repo=$1
+
+# input *.docx also given on command line
+if [ \! -d "$2" ]; then
+    echo "actxtract: directory $2 not found; are you in the right directory?"; exit
+fi
+docxDir=$2
+
+# CONVENTIONS
+#
+# use the current date as both the branch name and the title of the working directory
+currentDate=`date +%Y%d%m`
+
+branchName=$currentDate
+workDir="$3/$currentDate"
+mkdir -p $workDir/md
+
+echo "#+TITLE: actxtract run " `date`
+
+echo "* output original markdown to $workDir/orig"
+mkdir -p $workDir/orig
+parallel --progress                                 \
+	 pandoc {}                                  \
+	 -t markdown                                \
+	 -o $workDir/orig/{/.}.md                   \
+	 --wrap=none                                \
+	 --lua-filter=lua/delete_image.lua          \
+	 --lua-filter=lua/blockquote_to_plain.lua   \
+	 ::: $docxDir/*.docx
+
+
+# OPERATIONS
+#
+# generate snapshots of the text at different versions.
+#
+echo "* output \"after\" snapshots to $workDir/md/*-b.md"
+mkdir -p $workDir/md
+parallel --progress                                 \
+	 pandoc {}                                  \
+	 -t markdown                                \
+	 -o $workDir/md/{/.}-b.md                   \
+	 --wrap=none                                \
+	 --lua-filter=lua/delete_image.lua          \
+	 --lua-filter=lua/blockquote_to_plain.lua   \
+	 --lua-filter=lua/delete_strikethroughs.lua \
+	 --lua-filter=lua/strong_to_plain.lua       \
+	 ::: $docxDir/*.docx
+
+### this doesn't work because the original text also uses bold for its own purposes.
+### echo "* output \"before\" snapshots to $workDir/md/*-a.md"
+### # generate BEFORE labeled as A
+### parallel pandoc {} \
+### 	 -t markdown                                 \
+### 	 -o $workDir/md/{/.}-a.md                    \
+### 	 --wrap=none                                 \
+### 	 --lua-filter=lua/delete_image.lua           \
+### 	 --lua-filter=lua/blockquote_to_plain.lua    \
+### 	 --lua-filter=lua/strikethrough_to_plain.lua \
+### 	 --lua-filter=lua/delete_strong.lua          \
+### 	 ::: $docxDir/*.docx
+
+echo "* remove footnotes, indicated my superscripts"
+perl -pi -le 's/^\^.*//g; s/\^\d+\^//g; ' \
+     $workDir/md/*.md
+
+echo "* remove preamble"
+if [ \! -z "$4" ]; then
+    for i in $workDir/md/*.md; do
+	if grep -q "$4" $i; then
+	    echo "actxtract: de-ambling $i"
+	    perl -ni -le "print if /$4/ .. eof" $i
+	fi
+    done
+fi
+
+echo "* output to html and org for internal review"
+for o in html org; do
+    mkdir -p $workDir/$o
+    parallel pandoc {} --wrap=none -t $o -o $workDir/$o/{/.}.$o ::: $workDir/md/*.md
+done
+
+echo "* break sections out into separate files"
+echo "[TODO]"
+# see https://app.asana.com/0/1204079473909996/1204079480712143/f
+
+echo "* generate git commits"
+( cd ~/src/smucclaw/eu-ai-act
+  git checkout main
+  git branch   -D $branchName
+  git checkout -b $branchName
+)
+
+# [TODO] after we switch to breaking things out by section, we can't just copy everything to act.md; we'll have to reset each file
+( cd $workDir/md;
+  for i in *.md; do
+      cp $i $repo/act.md
+      ( cd  $repo
+	git add act.md
+	git commit -m `basename $i -b.md`
+      )
+  done
+)
+
