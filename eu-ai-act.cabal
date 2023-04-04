@@ -6,9 +6,9 @@ cabal-version: 1.12
 
 name:           eu-ai-act
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/asdf#readme>
-homepage:       https://github.com/githubuser/asdf#readme
-bug-reports:    https://github.com/githubuser/asdf/issues
+description:    Please see the README on GitHub at <https://github.com/githubuser/eu-ai-act#readme>
+homepage:       https://github.com/githubuser/eu-ai-act#readme
+bug-reports:    https://github.com/githubuser/eu-ai-act/issues
 author:         Author name here
 maintainer:     example@example.com
 copyright:      2023 Author name here
@@ -21,13 +21,13 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/smucclaw/eu-ai-act
+  location: https://github.com/githubuser/eu-ai-act
 
 library
   exposed-modules:
       Lib
   other-modules:
-      Paths_asdf
+      Paths_eu_ai_act
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
@@ -36,29 +36,29 @@ library
     , orgmode
   default-language: Haskell2010
 
-executable asdf-exe
+executable eu-ai-act-exe
   main-is: Main.hs
   other-modules:
-      Paths_asdf
+      Paths_eu_ai_act
   hs-source-dirs:
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      asdf
-    , base >=4.7 && <5
+      base >=4.7 && <5
+    , eu-ai-act
     , orgmode
   default-language: Haskell2010
 
-test-suite asdf-test
+test-suite eu-ai-act-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_asdf
+      Paths_eu_ai_act
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      asdf
-    , base >=4.7 && <5
+      base >=4.7 && <5
+    , eu-ai-act
     , orgmode
   default-language: Haskell2010

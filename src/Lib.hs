@@ -1,6 +1,20 @@
 module Lib
-    ( someFunc
+    ( orgMain
     ) where
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+import Data.OrgMode
+
+orgMain :: IO ()
+orgMain = do
+  input <- orgFile <$> getContents
+  putStrLn $ unlines $ showNode <$> odNodes input
+
+showNode :: Node -> String
+showNode n = unwords [ replicate (nDepth n) '*' , nTopic n ] ++ "\n" ++
+             concat [ showNode cn
+                    | ChildNode cn <- nChildren n
+                    ]
+
+
+
+
