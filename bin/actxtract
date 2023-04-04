@@ -96,6 +96,10 @@ echo "* remove footnotes, indicated my superscripts"
 perl -pi -le 's/^\^.*//g; s/\^\d+\^//g; ' \
      $workDir/md/*.md
 
+echo "* squash multiple blank lines"
+perl -000 -pi -le 's/\n\n+/\n\n/g' \
+     $workDir/md/*.md
+
 echo "* remove preamble"
 if [ \! -z "$4" ]; then
     for i in $workDir/md/*.md; do
