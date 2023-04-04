@@ -92,7 +92,7 @@ parallel --progress                                 \
 ### 	 --lua-filter=lua/delete_strong.lua          \
 ### 	 ::: $docxDir/*.docx
 
-echo "* remove footnotes, indicated my superscripts"
+echo "* remove footnotes, indicated by superscripts"
 perl -pi -le 's/^\^.*//g; s/\^\d+\^//g; ' \
      $workDir/md/*.md
 
@@ -138,5 +138,5 @@ echo "* generate git commits"
   done
 )
 
-echo "* pushing to origin"
+echo "* pushing to branch $branchName"
 git push --force origin $branchName
