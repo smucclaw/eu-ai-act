@@ -56,3 +56,9 @@ The output gets saved to ~actxtract.org~ which you can open as an org-mode in yo
 * Output
 
 If all goes well, a new branch is created and uploaded to Github. In that branch you will find an ~act.md~ which has a history of commits. Those commits correspond to the various versions of the Act found in the original set of input PDFs and Word Docx.
+
+* Other possibly useful tools
+
+GraphTage: diffing of trees like XML https://blog.trailofbits.com/2020/08/28/graphtage/
+
+
